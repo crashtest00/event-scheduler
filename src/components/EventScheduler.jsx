@@ -195,30 +195,35 @@ const EventScheduler = ({
     alert(`CSV would be generated with ${totalEvents} events! (This is just a prototype)`);
   };
 
-  // Validation functions
-  const validateRecurringPattern = (pattern) => {
+  // Generic validation function
+  const validateItem = (item, requiredFields, customValidators = []) => {
     // Check all required fields are filled
-    const requiredFields = ['program', 'startDate', 'startTime', 'endTime', 'capacity', 'eventType', 'location'];
-    const hasAllFields = requiredFields.every(field => pattern[field] && pattern[field].toString().trim() !== '');
+    const hasAllFields = requiredFields.every(field => item[field] && item[field].toString().trim() !== '');
     
     // Check staff array has at least one non-empty staff member
-    const hasValidStaff = Array.isArray(pattern.staff) && pattern.staff.some(staff => staff.trim() !== '');
+    const hasValidStaff = Array.isArray(item.staff) && item.staff.some(staff => staff.trim() !== '');
     
-    // Check at least one day is selected
-    const hasValidDays = Array.isArray(pattern.daysOfWeek) && pattern.daysOfWeek.length > 0;
+    // Run custom validators
+    const passesCustomValidation = customValidators.every(validator => validator(item));
     
-    return hasAllFields && hasValidStaff && hasValidDays;
+    return hasAllFields && hasValidStaff && passesCustomValidation;
+  };
+
+  // Specific validation functions using the generic validator
+  const validateRecurringPattern = (pattern) => {
+    const requiredFields = ['program', 'startDate', 'startTime', 'endTime', 'capacity', 'eventType', 'location'];
+    const customValidators = [
+      // Check at least one day is selected
+      (item) => Array.isArray(item.daysOfWeek) && item.daysOfWeek.length > 0
+    ];
+    
+    return validateItem(pattern, requiredFields, customValidators);
   };
 
   const validateSingleEvent = (event) => {
-    // Check all required fields are filled
     const requiredFields = ['program', 'date', 'startTime', 'endTime', 'capacity', 'eventType', 'location'];
-    const hasAllFields = requiredFields.every(field => event[field] && event[field].toString().trim() !== '');
     
-    // Check staff array has at least one non-empty staff member
-    const hasValidStaff = Array.isArray(event.staff) && event.staff.some(staff => staff.trim() !== '');
-    
-    return hasAllFields && hasValidStaff;
+    return validateItem(event, requiredFields);
   };
 
   // Generate combined preview
