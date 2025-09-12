@@ -38,14 +38,23 @@ const EventScheduler = ({
     );
   };
 
-  const updatePattern = (patternId, field, value) => {
-    setRecurringPatterns(patterns => 
-      patterns.map(pattern => 
-        pattern.id === patternId 
-          ? { ...pattern, [field]: value }
-          : pattern
+  // Generic update function
+  const updateItem = (itemId, field, value, setItems) => {
+    setItems(items => 
+      items.map(item => 
+        item.id === itemId 
+          ? { ...item, [field]: value }
+          : item
       )
     );
+  };
+
+  const updatePattern = (patternId, field, value) => {
+    updateItem(patternId, field, value, setRecurringPatterns);
+  };
+
+  const updateSingleEvent = (id, field, value) => {
+    updateItem(id, field, value, setSingleEvents);
   };
 
   const addPattern = () => {
@@ -92,73 +101,64 @@ const EventScheduler = ({
     }]);
   };
 
-  const updateSingleEvent = (id, field, value) => {
-    setSingleEvents(events => events.map(event => 
-      event.id === id ? { ...event, [field]: value } : event
-    ));
-  };
-
   const removeSingleEvent = (id) => {
     setSingleEvents(events => events.filter(event => event.id !== id));
   };
 
-  // Staff Management Functions
-  const addStaffToPattern = (patternId) => {
-    setRecurringPatterns(patterns => patterns.map(pattern =>
-      pattern.id === patternId 
-        ? { ...pattern, staff: [...pattern.staff, ''] }
-        : pattern
+  // Generic staff management functions
+  const addStaffToItem = (itemId, setItems) => {
+    setItems(items => items.map(item =>
+      item.id === itemId 
+        ? { ...item, staff: [...item.staff, ''] }
+        : item
     ));
+  };
+
+  const removeStaffFromItem = (itemId, staffIndex, setItems) => {
+    setItems(items => items.map(item =>
+      item.id === itemId 
+        ? { ...item, staff: item.staff.filter((_, index) => index !== staffIndex) }
+        : item
+    ));
+  };
+
+  const updateItemStaff = (itemId, staffIndex, value, setItems) => {
+    setItems(items => items.map(item =>
+      item.id === itemId 
+        ? { 
+            ...item, 
+            staff: item.staff.map((staff, index) => 
+              index === staffIndex ? value : staff
+            ) 
+          }
+        : item
+    ));
+  };
+
+  // Staff management functions for patterns
+  const addStaffToPattern = (patternId) => {
+    addStaffToItem(patternId, setRecurringPatterns);
   };
 
   const removeStaffFromPattern = (patternId, staffIndex) => {
-    setRecurringPatterns(patterns => patterns.map(pattern =>
-      pattern.id === patternId 
-        ? { ...pattern, staff: pattern.staff.filter((_, index) => index !== staffIndex) }
-        : pattern
-    ));
+    removeStaffFromItem(patternId, staffIndex, setRecurringPatterns);
   };
 
   const updatePatternStaff = (patternId, staffIndex, value) => {
-    setRecurringPatterns(patterns => patterns.map(pattern =>
-      pattern.id === patternId 
-        ? { 
-            ...pattern, 
-            staff: pattern.staff.map((staff, index) => 
-              index === staffIndex ? value : staff
-            ) 
-          }
-        : pattern
-    ));
+    updateItemStaff(patternId, staffIndex, value, setRecurringPatterns);
   };
 
+  // Staff management functions for events
   const addStaffToEvent = (eventId) => {
-    setSingleEvents(events => events.map(event =>
-      event.id === eventId 
-        ? { ...event, staff: [...event.staff, ''] }
-        : event
-    ));
+    addStaffToItem(eventId, setSingleEvents);
   };
 
   const removeStaffFromEvent = (eventId, staffIndex) => {
-    setSingleEvents(events => events.map(event =>
-      event.id === eventId 
-        ? { ...event, staff: event.staff.filter((_, index) => index !== staffIndex) }
-        : event
-    ));
+    removeStaffFromItem(eventId, staffIndex, setSingleEvents);
   };
 
   const updateEventStaff = (eventId, staffIndex, value) => {
-    setSingleEvents(events => events.map(event =>
-      event.id === eventId 
-        ? { 
-            ...event, 
-            staff: event.staff.map((staff, index) => 
-              index === staffIndex ? value : staff
-            ) 
-          }
-        : event
-    ));
+    updateItemStaff(eventId, staffIndex, value, setSingleEvents);
   };
 
   // Combined Functions
