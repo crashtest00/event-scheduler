@@ -3,7 +3,16 @@ import React from 'react';
 import { Download, Calendar, Repeat } from 'lucide-react';
 import EventPreview from './EventPreview.jsx';
 import { generateRecurringEvents } from '../utils/eventUtils.js';
-import { getCommonTimezones } from '../utils/timezoneUtils.js';
+import { 
+  StaffInputSection, 
+  LocationSection, 
+  EventTypeSelect, 
+  TimezoneSelect, 
+  ProgramInput, 
+  CapacityInput, 
+  TimeInput, 
+  DateInput 
+} from './FormComponents.jsx';
 
 const EventScheduler = ({ 
   recurringPatterns, 
@@ -298,134 +307,47 @@ const EventScheduler = ({
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Program
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="gener8tor Madison Fall 2012"
-                      value={pattern.program}
-                      onChange={(e) => updatePattern(pattern.id, 'program', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
+                  <ProgramInput 
+                    value={pattern.program}
+                    onChange={(value) => updatePattern(pattern.id, 'program', value)}
+                    colorTheme="blue"
+                  />
 
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Staff
-                    </label>
-                    <div className="space-y-2">
-                      {pattern.staff.map((staffMember, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            placeholder="First Last"
-                            value={staffMember}
-                            onChange={(e) => updatePatternStaff(pattern.id, index, e.target.value)}
-                            className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                          {pattern.staff.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeStaffFromPattern(pattern.id, index)}
-                              className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => addStaffToPattern(pattern.id)}
-                        className="flex items-center gap-1 px-3 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Add Staff Member
-                      </button>
-                    </div>
-                  </div>
+                  <StaffInputSection 
+                    staff={pattern.staff}
+                    onAddStaff={() => addStaffToPattern(pattern.id)}
+                    onRemoveStaff={(index) => removeStaffFromPattern(pattern.id, index)}
+                    onUpdateStaff={(index, value) => updatePatternStaff(pattern.id, index, value)}
+                    colorTheme="blue"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Event Type
-                    </label>
-                    <select
-                      value={pattern.eventType}
-                      onChange={(e) => updatePattern(pattern.id, 'eventType', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Select event type</option>
-                      <option value="mentor-swarm">Mentor Swarm</option>
-                      <option value="investor-swarm">Investor Swarm</option>
-                    </select>
-                  </div>
+                  <EventTypeSelect 
+                    value={pattern.eventType}
+                    onChange={(value) => updatePattern(pattern.id, 'eventType', value)}
+                    colorTheme="blue"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Capacity
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="Max attendees"
-                      value={pattern.capacity}
-                      onChange={(e) => updatePattern(pattern.id, 'capacity', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
+                  <CapacityInput 
+                    value={pattern.capacity}
+                    onChange={(value) => updatePattern(pattern.id, 'capacity', value)}
+                    colorTheme="blue"
+                  />
 
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Location Type
-                    </label>
-                    <div className="flex items-center space-x-6 mb-3">
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="radio"
-                          name={`location-type-${pattern.id}`}
-                          checked={!pattern.isVirtual}
-                          onChange={() => updatePattern(pattern.id, 'isVirtual', false)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">Physical Location</span>
-                      </label>
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="radio"
-                          name={`location-type-${pattern.id}`}
-                          checked={pattern.isVirtual}
-                          onChange={() => updatePattern(pattern.id, 'isVirtual', true)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">Virtual</span>
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Physical Address or Zoom link"
-                      value={pattern.location}
-                      onChange={(e) => updatePattern(pattern.id, 'location', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
+                  <LocationSection 
+                    isVirtual={pattern.isVirtual}
+                    location={pattern.location}
+                    onVirtualChange={(value) => updatePattern(pattern.id, 'isVirtual', value)}
+                    onLocationChange={(value) => updatePattern(pattern.id, 'location', value)}
+                    itemId={pattern.id}
+                    colorTheme="blue"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      value={pattern.startDate}
-                      onChange={(e) => updatePattern(pattern.id, 'startDate', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
+                  <DateInput 
+                    label="Start Date"
+                    value={pattern.startDate}
+                    onChange={(value) => updatePattern(pattern.id, 'startDate', value)}
+                    colorTheme="blue"
+                  />
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -441,46 +363,25 @@ const EventScheduler = ({
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Start Time
-                    </label>
-                    <input
-                      type="time"
-                      value={pattern.startTime}
-                      onChange={(e) => updatePattern(pattern.id, 'startTime', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
+                  <TimeInput 
+                    label="Start Time"
+                    value={pattern.startTime}
+                    onChange={(value) => updatePattern(pattern.id, 'startTime', value)}
+                    colorTheme="blue"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      End Time
-                    </label>
-                    <input
-                      type="time"
-                      value={pattern.endTime}
-                      onChange={(e) => updatePattern(pattern.id, 'endTime', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
+                  <TimeInput 
+                    label="End Time"
+                    value={pattern.endTime}
+                    onChange={(value) => updatePattern(pattern.id, 'endTime', value)}
+                    colorTheme="blue"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Timezone
-                    </label>
-                    <select
-                      value={pattern.timezone}
-                      onChange={(e) => updatePattern(pattern.id, 'timezone', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      {getCommonTimezones().map(timezone => (
-                        <option key={timezone.value} value={timezone.value}>
-                          {timezone.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <TimezoneSelect 
+                    value={pattern.timezone}
+                    onChange={(value) => updatePattern(pattern.id, 'timezone', value)}
+                    colorTheme="blue"
+                  />
 
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -526,175 +427,67 @@ const EventScheduler = ({
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Program
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="gener8tor Madison Fall 2012"
-                      value={event.program}
-                      onChange={(e) => updateSingleEvent(event.id, 'program', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
+                  <ProgramInput 
+                    value={event.program}
+                    onChange={(value) => updateSingleEvent(event.id, 'program', value)}
+                    colorTheme="green"
+                  />
 
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Staff
-                    </label>
-                    <div className="space-y-2">
-                      {event.staff.map((staffMember, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            placeholder="First Last"
-                            value={staffMember}
-                            onChange={(e) => updateEventStaff(event.id, index, e.target.value)}
-                            className="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          />
-                          {event.staff.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeStaffFromEvent(event.id, index)}
-                              className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => addStaffToEvent(event.id)}
-                        className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Add Staff Member
-                      </button>
-                    </div>
-                  </div>
+                  <StaffInputSection 
+                    staff={event.staff}
+                    onAddStaff={() => addStaffToEvent(event.id)}
+                    onRemoveStaff={(index) => removeStaffFromEvent(event.id, index)}
+                    onUpdateStaff={(index, value) => updateEventStaff(event.id, index, value)}
+                    colorTheme="green"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Event Type
-                    </label>
-                    <select
-                      value={event.eventType}
-                      onChange={(e) => updateSingleEvent(event.id, 'eventType', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    >
-                      <option value="">Select event type</option>
-                      <option value="mentor-swarm">Mentor Swarm</option>
-                      <option value="investor-swarm">Investor Swarm</option>
-                    </select>
-                  </div>
+                  <EventTypeSelect 
+                    value={event.eventType}
+                    onChange={(value) => updateSingleEvent(event.id, 'eventType', value)}
+                    colorTheme="green"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Capacity
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="Max attendees"
-                      value={event.capacity}
-                      onChange={(e) => updateSingleEvent(event.id, 'capacity', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
+                  <CapacityInput 
+                    value={event.capacity}
+                    onChange={(value) => updateSingleEvent(event.id, 'capacity', value)}
+                    colorTheme="green"
+                  />
 
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Location Type
-                    </label>
-                    <div className="flex items-center space-x-6 mb-2">
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="radio"
-                          name={`location-type-single-${event.id}`}
-                          checked={!event.isVirtual}
-                          onChange={() => updateSingleEvent(event.id, 'isVirtual', false)}
-                          className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">Physical Location</span>
-                      </label>
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="radio"
-                          name={`location-type-single-${event.id}`}
-                          checked={event.isVirtual}
-                          onChange={() => updateSingleEvent(event.id, 'isVirtual', true)}
-                          className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">Virtual</span>
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Physical Address or Zoom link"
-                      value={event.location}
-                      onChange={(e) => updateSingleEvent(event.id, 'location', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
+                  <LocationSection 
+                    isVirtual={event.isVirtual}
+                    location={event.location}
+                    onVirtualChange={(value) => updateSingleEvent(event.id, 'isVirtual', value)}
+                    onLocationChange={(value) => updateSingleEvent(event.id, 'location', value)}
+                    itemId={`single-${event.id}`}
+                    colorTheme="green"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Date
-                    </label>
-                    <input
-                      type="date"
-                      value={event.date}
-                      onChange={(e) => updateSingleEvent(event.id, 'date', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
+                  <DateInput 
+                    label="Date"
+                    value={event.date}
+                    onChange={(value) => updateSingleEvent(event.id, 'date', value)}
+                    colorTheme="green"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Start Time
-                    </label>
-                    <input
-                      type="time"
-                      value={event.startTime}
-                      onChange={(e) => updateSingleEvent(event.id, 'startTime', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
+                  <TimeInput 
+                    label="Start Time"
+                    value={event.startTime}
+                    onChange={(value) => updateSingleEvent(event.id, 'startTime', value)}
+                    colorTheme="green"
+                  />
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      End Time
-                    </label>
-                    <input
-                      type="time"
-                      value={event.endTime}
-                      onChange={(e) => updateSingleEvent(event.id, 'endTime', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
+                  <TimeInput 
+                    label="End Time"
+                    value={event.endTime}
+                    onChange={(value) => updateSingleEvent(event.id, 'endTime', value)}
+                    colorTheme="green"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Timezone
-                    </label>
-                    <select
-                      value={event.timezone}
-                      onChange={(e) => updateSingleEvent(event.id, 'timezone', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    >
-                      {getCommonTimezones().map(timezone => (
-                        <option key={timezone.value} value={timezone.value}>
-                          {timezone.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <TimezoneSelect 
+                    value={event.timezone}
+                    onChange={(value) => updateSingleEvent(event.id, 'timezone', value)}
+                    colorTheme="green"
+                  />
                 </div>
               </div>
             ))}
