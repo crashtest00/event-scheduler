@@ -1,0 +1,38 @@
+﻿Field,Description,Example,,,,,,,,,,,
+Slot,Calculated during CSV import. Leave blank,(Great Lakes F25) Wednesday 09/10 | 10:00am - 12:00pm Central,,,,,,,,,,,
+Program,Use as-is,Great Lakes Innovation Accelerator Fall 2025,,,,,,,,,,,6
+Staff,"Needs to support multiple staff. Each staff ""First Last"" needs separated by a comma","Soham Dalal,Samantha Schwartz",,,,,,,,,,,6
+Virtual Location,Use the location toggle to determine whether the location field is pasted here or in Physical location,https://gener8tor.zoom.us/j/86185458208,,,,,,,,,,,6
+Physical Location,Use the location toggle to determine whether the location field is pasted here or in Virtual location,,,,,,,,,,,,6
+Event Type,Use as-is,Mentor Swarm,,,,,,,,,,,6
+Day of Week,Use as-is,Wednesday,,,,,,,,,,,6
+Event Date,Use as-is,9/10/2025,,,,,,,,,,,6
+Start Time,"Parse from date/time field. Follow this format EXACTLY, including case.",10:00am,,,,,,,,,,,6
+End Time,"Parse from date/time field. Follow this format EXACTLY, including case.",12:00pm,,,,,,,,,,,6
+Time Zone,Use as-is,Central,,,,,,,,,,,6
+GMT Start,Use javascript library and user entered timezone to calculate this. Make sure to account for daylight savings!,9/10/2025 3:00pm,,,,,,,,,,,6
+GMT End,Use javascript library and user entered timezone to calculate this. Make sure to account for daylight savings!,9/10/2025 5:00pm,,,,,,,,,,,6
+Slot Registrant Capacity,Use as-is,6,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,7
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
+,,,,,,,,,,,,,6
