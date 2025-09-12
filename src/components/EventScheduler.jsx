@@ -226,6 +226,207 @@ const EventScheduler = ({
     return validateItem(event, requiredFields);
   };
 
+  // Card rendering functions
+  const renderRecurringPatternCard = (pattern, globalIndex) => (
+    <div key={pattern.id} className="border border-blue-200 bg-blue-50 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <Repeat className="w-4 h-4 text-blue-600 mr-2" />
+          <h3 className="font-medium text-gray-900">Recurring Pattern #{globalIndex + 1}</h3>
+        </div>
+        <button 
+          onClick={() => removePattern(pattern.id)}
+          className="text-red-600 hover:text-red-800 text-sm"
+        >
+          Remove
+        </button>
+      </div>
+      
+      <div className="grid md:grid-cols-2 gap-4">
+        <ProgramInput 
+          value={pattern.program}
+          onChange={(value) => updatePattern(pattern.id, 'program', value)}
+          colorTheme="blue"
+        />
+
+        <StaffInputSection 
+          staff={pattern.staff}
+          onAddStaff={() => addStaffToPattern(pattern.id)}
+          onRemoveStaff={(index) => removeStaffFromPattern(pattern.id, index)}
+          onUpdateStaff={(index, value) => updatePatternStaff(pattern.id, index, value)}
+          colorTheme="blue"
+        />
+
+        <EventTypeSelect 
+          value={pattern.eventType}
+          onChange={(value) => updatePattern(pattern.id, 'eventType', value)}
+          colorTheme="blue"
+        />
+
+        <CapacityInput 
+          value={pattern.capacity}
+          onChange={(value) => updatePattern(pattern.id, 'capacity', value)}
+          colorTheme="blue"
+        />
+
+        <LocationSection 
+          isVirtual={pattern.isVirtual}
+          location={pattern.location}
+          onVirtualChange={(value) => updatePattern(pattern.id, 'isVirtual', value)}
+          onLocationChange={(value) => updatePattern(pattern.id, 'location', value)}
+          itemId={pattern.id}
+          colorTheme="blue"
+        />
+
+        <DateInput 
+          label="Start Date"
+          value={pattern.startDate}
+          onChange={(value) => updatePattern(pattern.id, 'startDate', value)}
+          colorTheme="blue"
+        />
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Number of Weeks
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="52"
+            value={pattern.weeks}
+            onChange={(e) => updatePattern(pattern.id, 'weeks', parseInt(e.target.value) || 8)}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <TimeInput 
+          label="Start Time"
+          value={pattern.startTime}
+          onChange={(value) => updatePattern(pattern.id, 'startTime', value)}
+          colorTheme="blue"
+        />
+
+        <TimeInput 
+          label="End Time"
+          value={pattern.endTime}
+          onChange={(value) => updatePattern(pattern.id, 'endTime', value)}
+          colorTheme="blue"
+        />
+
+        <TimezoneSelect 
+          value={pattern.timezone}
+          onChange={(value) => updatePattern(pattern.id, 'timezone', value)}
+          colorTheme="blue"
+        />
+
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Days of Week
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {daysOfWeek.map(day => (
+              <label key={day.value} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={pattern.daysOfWeek?.includes(day.value) || false}
+                  onChange={() => handleDayToggle(pattern.id, day.value)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <span className="text-sm text-gray-700">{day.label}</span>
+              </label>
+            ))}
+          </div>
+          {pattern.daysOfWeek?.length > 0 && (
+            <div className="mt-2 text-sm text-blue-600">
+              Selected: {pattern.daysOfWeek.length} day{pattern.daysOfWeek.length !== 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSingleEventCard = (event, globalIndex) => (
+    <div key={event.id} className="border border-green-200 bg-green-50 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center">
+          <Calendar className="w-4 h-4 text-green-600 mr-2" />
+          <span className="font-medium text-gray-900">Single Event #{globalIndex + 1}</span>
+        </div>
+        <button
+          onClick={() => removeSingleEvent(event.id)}
+          className="text-red-500 hover:text-red-700 text-sm"
+        >
+          Remove
+        </button>
+      </div>
+      
+      <div className="grid md:grid-cols-2 gap-4">
+        <ProgramInput 
+          value={event.program}
+          onChange={(value) => updateSingleEvent(event.id, 'program', value)}
+          colorTheme="green"
+        />
+
+        <StaffInputSection 
+          staff={event.staff}
+          onAddStaff={() => addStaffToEvent(event.id)}
+          onRemoveStaff={(index) => removeStaffFromEvent(event.id, index)}
+          onUpdateStaff={(index, value) => updateEventStaff(event.id, index, value)}
+          colorTheme="green"
+        />
+
+        <EventTypeSelect 
+          value={event.eventType}
+          onChange={(value) => updateSingleEvent(event.id, 'eventType', value)}
+          colorTheme="green"
+        />
+
+        <CapacityInput 
+          value={event.capacity}
+          onChange={(value) => updateSingleEvent(event.id, 'capacity', value)}
+          colorTheme="green"
+        />
+
+        <LocationSection 
+          isVirtual={event.isVirtual}
+          location={event.location}
+          onVirtualChange={(value) => updateSingleEvent(event.id, 'isVirtual', value)}
+          onLocationChange={(value) => updateSingleEvent(event.id, 'location', value)}
+          itemId={`single-${event.id}`}
+          colorTheme="green"
+        />
+
+        <DateInput 
+          label="Date"
+          value={event.date}
+          onChange={(value) => updateSingleEvent(event.id, 'date', value)}
+          colorTheme="green"
+        />
+
+        <TimeInput 
+          label="Start Time"
+          value={event.startTime}
+          onChange={(value) => updateSingleEvent(event.id, 'startTime', value)}
+          colorTheme="green"
+        />
+        
+        <TimeInput 
+          label="End Time"
+          value={event.endTime}
+          onChange={(value) => updateSingleEvent(event.id, 'endTime', value)}
+          colorTheme="green"
+        />
+
+        <TimezoneSelect 
+          value={event.timezone}
+          onChange={(value) => updateSingleEvent(event.id, 'timezone', value)}
+          colorTheme="green"
+        />
+      </div>
+    </div>
+  );
+
   // Generate combined preview
   const recurringEvents = recurringPatterns.flatMap(pattern => 
     generateRecurringEvents(pattern)
@@ -295,207 +496,27 @@ const EventScheduler = ({
           </div>
 
           <div className="space-y-6">
-            {/* Recurring Patterns */}
-            {recurringPatterns.map((pattern, index) => (
-              <div key={pattern.id} className="border border-blue-200 bg-blue-50 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center">
-                    <Repeat className="w-4 h-4 text-blue-600 mr-2" />
-                    <h3 className="font-medium text-gray-900">Recurring Pattern #{index + 1}</h3>
-                  </div>
-                  <button 
-                    onClick={() => removePattern(pattern.id)}
-                    className="text-red-600 hover:text-red-800 text-sm"
-                  >
-                    Remove
-                  </button>
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <ProgramInput 
-                    value={pattern.program}
-                    onChange={(value) => updatePattern(pattern.id, 'program', value)}
-                    colorTheme="blue"
-                  />
+            {/* Combined Events in Creation Order */}
+            {(() => {
+              // Create combined array with type information and sort by creation time (id)
+              const allCards = [
+                ...recurringPatterns.map(pattern => ({ ...pattern, cardType: 'pattern' })),
+                ...singleEvents.map(event => ({ ...event, cardType: 'event' }))
+              ].sort((a, b) => a.id - b.id);
 
-                  <StaffInputSection 
-                    staff={pattern.staff}
-                    onAddStaff={() => addStaffToPattern(pattern.id)}
-                    onRemoveStaff={(index) => removeStaffFromPattern(pattern.id, index)}
-                    onUpdateStaff={(index, value) => updatePatternStaff(pattern.id, index, value)}
-                    colorTheme="blue"
-                  />
+              let patternCount = 0;
+              let eventCount = 0;
 
-                  <EventTypeSelect 
-                    value={pattern.eventType}
-                    onChange={(value) => updatePattern(pattern.id, 'eventType', value)}
-                    colorTheme="blue"
-                  />
-
-                  <CapacityInput 
-                    value={pattern.capacity}
-                    onChange={(value) => updatePattern(pattern.id, 'capacity', value)}
-                    colorTheme="blue"
-                  />
-
-                  <LocationSection 
-                    isVirtual={pattern.isVirtual}
-                    location={pattern.location}
-                    onVirtualChange={(value) => updatePattern(pattern.id, 'isVirtual', value)}
-                    onLocationChange={(value) => updatePattern(pattern.id, 'location', value)}
-                    itemId={pattern.id}
-                    colorTheme="blue"
-                  />
-
-                  <DateInput 
-                    label="Start Date"
-                    value={pattern.startDate}
-                    onChange={(value) => updatePattern(pattern.id, 'startDate', value)}
-                    colorTheme="blue"
-                  />
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Number of Weeks
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="52"
-                      value={pattern.weeks}
-                      onChange={(e) => updatePattern(pattern.id, 'weeks', parseInt(e.target.value) || 8)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <TimeInput 
-                    label="Start Time"
-                    value={pattern.startTime}
-                    onChange={(value) => updatePattern(pattern.id, 'startTime', value)}
-                    colorTheme="blue"
-                  />
-
-                  <TimeInput 
-                    label="End Time"
-                    value={pattern.endTime}
-                    onChange={(value) => updatePattern(pattern.id, 'endTime', value)}
-                    colorTheme="blue"
-                  />
-
-                  <TimezoneSelect 
-                    value={pattern.timezone}
-                    onChange={(value) => updatePattern(pattern.id, 'timezone', value)}
-                    colorTheme="blue"
-                  />
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Days of Week
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {daysOfWeek.map(day => (
-                        <label key={day.value} className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={pattern.daysOfWeek?.includes(day.value) || false}
-                            onChange={() => handleDayToggle(pattern.id, day.value)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                          />
-                          <span className="text-sm text-gray-700">{day.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                    {pattern.daysOfWeek?.length > 0 && (
-                      <div className="mt-2 text-sm text-blue-600">
-                        Selected: {pattern.daysOfWeek.length} day{pattern.daysOfWeek.length !== 1 ? 's' : ''}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Single Events */}
-            {singleEvents.map((event, index) => (
-              <div key={event.id} className="border border-green-200 bg-green-50 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 text-green-600 mr-2" />
-                    <span className="font-medium text-gray-900">Single Event #{index + 1}</span>
-                  </div>
-                  <button
-                    onClick={() => removeSingleEvent(event.id)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Remove
-                  </button>
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <ProgramInput 
-                    value={event.program}
-                    onChange={(value) => updateSingleEvent(event.id, 'program', value)}
-                    colorTheme="green"
-                  />
-
-                  <StaffInputSection 
-                    staff={event.staff}
-                    onAddStaff={() => addStaffToEvent(event.id)}
-                    onRemoveStaff={(index) => removeStaffFromEvent(event.id, index)}
-                    onUpdateStaff={(index, value) => updateEventStaff(event.id, index, value)}
-                    colorTheme="green"
-                  />
-
-                  <EventTypeSelect 
-                    value={event.eventType}
-                    onChange={(value) => updateSingleEvent(event.id, 'eventType', value)}
-                    colorTheme="green"
-                  />
-
-                  <CapacityInput 
-                    value={event.capacity}
-                    onChange={(value) => updateSingleEvent(event.id, 'capacity', value)}
-                    colorTheme="green"
-                  />
-
-                  <LocationSection 
-                    isVirtual={event.isVirtual}
-                    location={event.location}
-                    onVirtualChange={(value) => updateSingleEvent(event.id, 'isVirtual', value)}
-                    onLocationChange={(value) => updateSingleEvent(event.id, 'location', value)}
-                    itemId={`single-${event.id}`}
-                    colorTheme="green"
-                  />
-
-                  <DateInput 
-                    label="Date"
-                    value={event.date}
-                    onChange={(value) => updateSingleEvent(event.id, 'date', value)}
-                    colorTheme="green"
-                  />
-
-                  <TimeInput 
-                    label="Start Time"
-                    value={event.startTime}
-                    onChange={(value) => updateSingleEvent(event.id, 'startTime', value)}
-                    colorTheme="green"
-                  />
-                  
-                  <TimeInput 
-                    label="End Time"
-                    value={event.endTime}
-                    onChange={(value) => updateSingleEvent(event.id, 'endTime', value)}
-                    colorTheme="green"
-                  />
-
-                  <TimezoneSelect 
-                    value={event.timezone}
-                    onChange={(value) => updateSingleEvent(event.id, 'timezone', value)}
-                    colorTheme="green"
-                  />
-                </div>
-              </div>
-            ))}
+              return allCards.map((item) => {
+                if (item.cardType === 'pattern') {
+                  const index = patternCount++;
+                  return renderRecurringPatternCard(item, index);
+                } else {
+                  const index = eventCount++;
+                  return renderSingleEventCard(item, index);
+                }
+              });
+            })()}
           </div>
 
           {/* Add Buttons at Bottom */}
