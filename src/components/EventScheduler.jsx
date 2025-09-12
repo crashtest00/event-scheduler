@@ -19,7 +19,11 @@ const EventScheduler = ({
   setRecurringPatterns,
   singleEvents,
   setSingleEvents,
-  timezone
+  timezone,
+  program,
+  setProgram,
+  staff,
+  setStaff
 }) => {
   const daysOfWeek = [
     { value: '0', label: 'Sunday' },
@@ -80,8 +84,6 @@ const EventScheduler = ({
         weeks: 8,
         timezone: 'America/New_York',
         capacity: '',
-        staff: [''],
-        program: '',
         eventType: '',
         isVirtual: false,
         location: ''
@@ -102,8 +104,6 @@ const EventScheduler = ({
       endTime: '',
       timezone: timezone,
       capacity: '',
-      staff: [''],
-      program: '',
       eventType: '',
       isVirtual: false,
       location: ''
@@ -114,78 +114,52 @@ const EventScheduler = ({
     setSingleEvents(events => events.filter(event => event.id !== id));
   };
 
-  // Generic staff management functions
-  const addStaffToItem = (itemId, setItems) => {
-    setItems(items => items.map(item =>
-      item.id === itemId 
-        ? { ...item, staff: [...item.staff, ''] }
-        : item
-    ));
+  // Note: Generic staff management functions removed since staff is now global
+
+  // Note: Staff management functions for individual patterns/events removed
+  // since staff is now managed globally
+
+  // Global staff management functions
+  const addGlobalStaff = () => {
+    setStaff(currentStaff => [...currentStaff, '']);
   };
 
-  const removeStaffFromItem = (itemId, staffIndex, setItems) => {
-    setItems(items => items.map(item =>
-      item.id === itemId 
-        ? { ...item, staff: item.staff.filter((_, index) => index !== staffIndex) }
-        : item
-    ));
+  const removeGlobalStaff = (index) => {
+    setStaff(currentStaff => currentStaff.filter((_, i) => i !== index));
   };
 
-  const updateItemStaff = (itemId, staffIndex, value, setItems) => {
-    setItems(items => items.map(item =>
-      item.id === itemId 
-        ? { 
-            ...item, 
-            staff: item.staff.map((staff, index) => 
-              index === staffIndex ? value : staff
-            ) 
-          }
-        : item
-    ));
-  };
-
-  // Staff management functions for patterns
-  const addStaffToPattern = (patternId) => {
-    addStaffToItem(patternId, setRecurringPatterns);
-  };
-
-  const removeStaffFromPattern = (patternId, staffIndex) => {
-    removeStaffFromItem(patternId, staffIndex, setRecurringPatterns);
-  };
-
-  const updatePatternStaff = (patternId, staffIndex, value) => {
-    updateItemStaff(patternId, staffIndex, value, setRecurringPatterns);
-  };
-
-  // Staff management functions for events
-  const addStaffToEvent = (eventId) => {
-    addStaffToItem(eventId, setSingleEvents);
-  };
-
-  const removeStaffFromEvent = (eventId, staffIndex) => {
-    removeStaffFromItem(eventId, staffIndex, setSingleEvents);
-  };
-
-  const updateEventStaff = (eventId, staffIndex, value) => {
-    updateItemStaff(eventId, staffIndex, value, setSingleEvents);
+  const updateGlobalStaff = (index, value) => {
+    setStaff(currentStaff => 
+      currentStaff.map((staffMember, i) => 
+        i === index ? value : staffMember
+      )
+    );
   };
 
   // Combined Functions
   const handleGenerateCSV = () => {
-    const recurringEvents = recurringPatterns.flatMap(pattern => 
+    // Add global program and staff to patterns before generating events
+    const patternsWithGlobalData = recurringPatterns.map(pattern => ({
+      ...pattern,
+      program,
+      staff
+    }));
+    
+    const recurringEvents = patternsWithGlobalData.flatMap(pattern => 
       generateRecurringEvents(pattern)
     );
+    
     const allSingleEvents = singleEvents
-      .filter(event => event.program && event.date)
+      .filter(event => event.date) // No longer need to check event.program since it's global
       .map(event => ({
-        name: event.program,
+        name: program,
         date: new Date(event.date).toLocaleDateString(),
         startTime: event.startTime,
         endTime: event.endTime,
         timezone: event.timezone,
         capacity: event.capacity,
-        staff: event.staff,
-        program: event.program,
+        staff: staff,
+        program: program,
         eventType: event.eventType,
         isVirtual: event.isVirtual,
         location: event.location
@@ -195,35 +169,39 @@ const EventScheduler = ({
     alert(`CSV would be generated with ${totalEvents} events! (This is just a prototype)`);
   };
 
-  // Generic validation function
+  // Generic validation function (staff validation moved to global)
   const validateItem = (item, requiredFields, customValidators = []) => {
     // Check all required fields are filled
     const hasAllFields = requiredFields.every(field => item[field] && item[field].toString().trim() !== '');
     
-    // Check staff array has at least one non-empty staff member
-    const hasValidStaff = Array.isArray(item.staff) && item.staff.some(staff => staff.trim() !== '');
-    
     // Run custom validators
     const passesCustomValidation = customValidators.every(validator => validator(item));
     
-    return hasAllFields && hasValidStaff && passesCustomValidation;
+    return hasAllFields && passesCustomValidation;
+  };
+
+  // Global validation helper
+  const validateGlobalData = () => {
+    const hasProgram = program && program.trim() !== '';
+    const hasValidStaff = Array.isArray(staff) && staff.some(staffMember => staffMember.trim() !== '');
+    return hasProgram && hasValidStaff;
   };
 
   // Specific validation functions using the generic validator
   const validateRecurringPattern = (pattern) => {
-    const requiredFields = ['program', 'startDate', 'startTime', 'endTime', 'capacity', 'eventType', 'location'];
+    const requiredFields = ['startDate', 'startTime', 'endTime', 'capacity', 'eventType', 'location'];
     const customValidators = [
       // Check at least one day is selected
       (item) => Array.isArray(item.daysOfWeek) && item.daysOfWeek.length > 0
     ];
     
-    return validateItem(pattern, requiredFields, customValidators);
+    return validateGlobalData() && validateItem(pattern, requiredFields, customValidators);
   };
 
   const validateSingleEvent = (event) => {
-    const requiredFields = ['program', 'date', 'startTime', 'endTime', 'capacity', 'eventType', 'location'];
+    const requiredFields = ['date', 'startTime', 'endTime', 'capacity', 'eventType', 'location'];
     
-    return validateItem(event, requiredFields);
+    return validateGlobalData() && validateItem(event, requiredFields);
   };
 
   // Card rendering functions
@@ -243,20 +221,6 @@ const EventScheduler = ({
       </div>
       
       <div className="grid md:grid-cols-2 gap-4">
-        <ProgramInput 
-          value={pattern.program}
-          onChange={(value) => updatePattern(pattern.id, 'program', value)}
-          colorTheme="blue"
-        />
-
-        <StaffInputSection 
-          staff={pattern.staff}
-          onAddStaff={() => addStaffToPattern(pattern.id)}
-          onRemoveStaff={(index) => removeStaffFromPattern(pattern.id, index)}
-          onUpdateStaff={(index, value) => updatePatternStaff(pattern.id, index, value)}
-          colorTheme="blue"
-        />
-
         <EventTypeSelect 
           value={pattern.eventType}
           onChange={(value) => updatePattern(pattern.id, 'eventType', value)}
@@ -362,20 +326,6 @@ const EventScheduler = ({
       </div>
       
       <div className="grid md:grid-cols-2 gap-4">
-        <ProgramInput 
-          value={event.program}
-          onChange={(value) => updateSingleEvent(event.id, 'program', value)}
-          colorTheme="green"
-        />
-
-        <StaffInputSection 
-          staff={event.staff}
-          onAddStaff={() => addStaffToEvent(event.id)}
-          onRemoveStaff={(index) => removeStaffFromEvent(event.id, index)}
-          onUpdateStaff={(index, value) => updateEventStaff(event.id, index, value)}
-          colorTheme="green"
-        />
-
         <EventTypeSelect 
           value={event.eventType}
           onChange={(value) => updateSingleEvent(event.id, 'eventType', value)}
@@ -428,20 +378,26 @@ const EventScheduler = ({
   );
 
   // Generate combined preview
-  const recurringEvents = recurringPatterns.flatMap(pattern => 
+  const patternsWithGlobalData = recurringPatterns.map(pattern => ({
+    ...pattern,
+    program,
+    staff
+  }));
+  
+  const recurringEvents = patternsWithGlobalData.flatMap(pattern => 
     generateRecurringEvents(pattern)
   );
   
   const formattedSingleEvents = singleEvents
-    .filter(event => event.program && event.date)
+    .filter(event => event.date) // No longer need to check event.program since it's global
     .map(event => ({
-      name: event.program,
+      name: program,
       date: new Date(event.date).toLocaleDateString(),
       time: event.startTime && event.endTime ? `${event.startTime} - ${event.endTime}` : 'Time not set',
       timezone: event.timezone,
       capacity: event.capacity,
-      staff: event.staff,
-      program: event.program,
+      staff: staff,
+      program: program,
       eventType: event.eventType,
       isVirtual: event.isVirtual,
       location: event.location
@@ -462,6 +418,30 @@ const EventScheduler = ({
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 text-center">Event Scheduler</h1>
+      </div>
+
+      {/* Global Program and Staff Section */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Program Information</h2>
+          <p className="text-sm text-gray-600">This information will apply to all events you create.</p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-6">
+          <ProgramInput 
+            value={program}
+            onChange={setProgram}
+            colorTheme="gray"
+          />
+          
+          <StaffInputSection 
+            staff={staff}
+            onAddStaff={addGlobalStaff}
+            onRemoveStaff={removeGlobalStaff}
+            onUpdateStaff={updateGlobalStaff}
+            colorTheme="gray"
+          />
+        </div>
       </div>
 
       {/* Add Event Buttons */}
