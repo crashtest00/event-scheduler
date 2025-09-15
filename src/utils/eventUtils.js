@@ -48,8 +48,19 @@ const getDayOfWeekName = (dayNumber) => {
 
 const formatTimeWithCase = (timeString) => {
   if (!timeString) return '';
-  // Ensure proper case: 10:00am, 12:00pm (lowercase am/pm)
-  return timeString.toLowerCase().replace(/(\d+:\d+)\s*(am|pm)/, '$1$2');
+  // Format time to match pattern exactly: "10:00am" (lowercase am/pm, no spaces)
+  const cleaned = timeString.trim().toLowerCase().replace(/\s+/g, '');
+  // Handle various input formats and normalize to HH:MMam/pm
+  const timeMatch = cleaned.match(/(\d{1,2}):?(\d{0,2})\s*(am|pm|a|p)/i);
+  if (timeMatch) {
+    const hours = timeMatch[1];
+    const minutes = timeMatch[2] || '00';
+    const period = timeMatch[3].toLowerCase();
+    const normalizedPeriod = period === 'a' ? 'am' : period === 'p' ? 'pm' : period;
+    return `${hours}:${minutes.padStart(2, '0')}${normalizedPeriod}`;
+  }
+  // Fallback: just clean up existing format
+  return cleaned.replace(/(\d+:\d+)\s*(am|pm)/, '$1$2');
 };
 
 const formatDateForSchema = (dateString) => {
@@ -72,23 +83,8 @@ const calculateGMTDateTime = (dateString, timeString, timezone) => {
     if (period === 'pm' && hours !== 12) hours += 12;
     if (period === 'am' && hours === 12) hours = 0;
     
-    // Map common timezone names to IANA timezone identifiers
-    const timezoneMap = {
-      'Eastern': 'America/New_York',
-      'Central': 'America/Chicago', 
-      'Mountain': 'America/Denver',
-      'Pacific': 'America/Los_Angeles',
-      'EST': 'America/New_York',
-      'CST': 'America/Chicago',
-      'MST': 'America/Denver', 
-      'PST': 'America/Los_Angeles',
-      'EDT': 'America/New_York',
-      'CDT': 'America/Chicago',
-      'MDT': 'America/Denver',
-      'PDT': 'America/Los_Angeles'
-    };
-    
-    const ianaTimezone = timezoneMap[timezone] || timezone;
+    // Use centralized timezone registry to get IANA identifier
+    const ianaTimezone = getIanaTimezone(timezone);
     
     // Create a date in the specified timezone using JavaScript's built-in timezone support
     const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes || 0);
@@ -109,6 +105,19 @@ const calculateGMTDateTime = (dateString, timeString, timezone) => {
     return '';
   }
 };
+
+// Map event type values to display names for CSV
+const mapEventTypeForCSV = (eventType) => {
+  const eventTypeMap = {
+    'mentor-swarm': 'Mentor Swarm',
+    'investor-swarm': 'Investor Swarm'
+  };
+  return eventTypeMap[eventType] || eventType;
+};
+
+// Use centralized timezone mapping for CSV
+import { mapToLabel, getIanaTimezone } from './timezoneRegistry.js';
+const mapTimezoneForCSV = mapToLabel;
 
 export const generateCSVContent = (events) => {
   // Schema-compliant headers as defined in SchemaDefinition.csv
@@ -149,17 +158,17 @@ export const generateCSVContent = (events) => {
     const dayOfWeek = getDayOfWeekName(typeof event.dayOfWeek === 'number' ? event.dayOfWeek : new Date(event.date).getDay());
     
     const row = [
-      '', // Slot - Leave blank as per schema instructions
+      '', // Slot - Leave blank as per schema instructions. No space between comma & names.
       `"${event.program || ''}"`,
-      `"${Array.isArray(event.staff) ? event.staff.filter(s => s.trim()).join(', ') : (event.staff || '')}"`, // Convert staff array to comma-separated string
+      `"${Array.isArray(event.staff) ? event.staff.filter(s => s.trim()).join(',') : (event.staff || '')}"`, // Convert staff array to comma-separated string
       event.isVirtual ? `"${event.location || ''}"` : '', // Virtual Location
       !event.isVirtual ? `"${event.location || ''}"` : '', // Physical Location  
-      event.eventType || '',
+      mapEventTypeForCSV(event.eventType) || '',
       dayOfWeek,
       eventDate,
       startTime,
       endTime,
-      event.timezone || '',
+      mapTimezoneForCSV(event.timezone) || '',
       calculateGMTDateTime(event.date, startTime, event.timezone), // GMT Start
       calculateGMTDateTime(event.date, endTime, event.timezone), // GMT End
       event.capacity || ''
@@ -171,18 +180,15 @@ export const generateCSVContent = (events) => {
 };
 
 export const downloadCSV = (content, filename = 'events.csv') => {
-  // This would trigger the actual download
-  // For prototype purposes, just log the content
-  console.log('CSV Content:', content);
-  console.log('Filename:', filename);
-  
-  // In a real app, you'd do:
-  // const blob = new Blob([content], { type: 'text/csv' });
-  // const url = window.URL.createObjectURL(blob);
-  // const a = document.createElement('a');
-  // a.href = url;
-  // a.download = filename;
-  // a.click();
+  const blob = new Blob([content], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 };
 
 export const validateEvent = (event) => {

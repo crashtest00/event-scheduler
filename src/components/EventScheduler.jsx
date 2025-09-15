@@ -2,7 +2,7 @@
 import React from 'react';
 import { Download, Calendar, Repeat } from 'lucide-react';
 import EventPreview from './EventPreview.jsx';
-import { generateRecurringEvents } from '../utils/eventUtils.js';
+import { generateRecurringEvents, generateCSVContent, downloadCSV } from '../utils/eventUtils.js';
 import { 
   StaffInputSection, 
   LocationSection, 
@@ -79,7 +79,7 @@ const EventScheduler = ({
         startDate: '',
         endDate: '',
         daysOfWeek: [],
-        startTime: '',
+        startTime: '09:00',
         endTime: '',
         weeks: 8,
         timezone: 'America/New_York',
@@ -100,7 +100,7 @@ const EventScheduler = ({
     setSingleEvents(events => [...events, { 
       id: Date.now(), 
       date: '', 
-      startTime: '', 
+      startTime: '09:00', 
       endTime: '',
       timezone: timezone,
       capacity: '',
@@ -165,8 +165,9 @@ const EventScheduler = ({
         location: event.location
       }));
     
-    const totalEvents = recurringEvents.length + allSingleEvents.length;
-    alert(`CSV would be generated with ${totalEvents} events! (This is just a prototype)`);
+    const allEvents = [...recurringEvents, ...allSingleEvents];
+    const csvContent = generateCSVContent(allEvents);
+    downloadCSV(csvContent, 'events.csv');
   };
 
   // Generic validation function (staff validation moved to global)

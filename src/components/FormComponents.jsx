@@ -1,5 +1,9 @@
 import React from 'react';
 import { getCommonTimezones } from '../utils/timezoneUtils.js';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 // Simple form components without TW Elements complexity
 
@@ -196,17 +200,57 @@ export const TimeInput = ({
   onChange,
   colorTheme = "blue",
 }) => {
+  // Convert string time (HH:mm) to dayjs object
+  const timeValue = value ? dayjs(`2000-01-01 ${value}`) : null;
+
+  const handleTimeChange = (newValue) => {
+    if (newValue) {
+      // Convert dayjs object back to HH:mm string
+      const timeString = newValue.format('HH:mm');
+      onChange(timeString);
+    } else {
+      onChange('');
+    }
+  };
+
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
         {label}
       </label>
-      <input
-        type="time"
-        value={value || "09:00"}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      />
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <TimePicker
+          value={timeValue}
+          onChange={handleTimeChange}
+          format="h:mm A"
+          ampm={true}
+          slotProps={{
+            textField: {
+              className: "w-full",
+              style: {
+                width: '100%'
+              },
+              sx: {
+                '& .MuiOutlinedInput-root': {
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: '#fff',
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#3B82F6',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#3B82F6',
+                    borderWidth: '2px',
+                  },
+                },
+                '& .MuiOutlinedInput-input': {
+                  padding: '0px',
+                },
+              }
+            }
+          }}
+        />
+      </LocalizationProvider>
     </div>
   );
 };

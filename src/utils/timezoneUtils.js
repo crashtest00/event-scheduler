@@ -1,31 +1,12 @@
 // Timezone utilities using the native Intl API
+import { getTimezoneOptionsForUI } from './timezoneRegistry.js';
 
 /**
- * Get a curated list of common timezones with user-friendly labels
+ * Get a curated list of supported timezones with consistent labels
+ * Uses the centralized timezone registry for consistency between UI and CSV
  */
 export const getCommonTimezones = () => {
-  const commonTimezones = [
-    // US Timezones
-    { value: 'America/New_York', label: 'Eastern Time (ET)' },
-    { value: 'America/Chicago', label: 'Central Time (CT)' },
-    { value: 'America/Denver', label: 'Mountain Time (MT)' },
-    { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
-    { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
-    { value: 'Pacific/Honolulu', label: 'Hawaii Time (HST)' },
-    
-    // International
-    { value: 'UTC', label: 'Coordinated Universal Time (UTC)' },
-    { value: 'Europe/London', label: 'Greenwich Mean Time (GMT)' },
-    { value: 'Europe/Paris', label: 'Central European Time - Paris (CET)' },
-    { value: 'Europe/Berlin', label: 'Central European Time - Berlin (CET)' },
-    { value: 'Asia/Tokyo', label: 'Japan Standard Time (JST)' },
-    { value: 'Asia/Shanghai', label: 'China Standard Time (CST)' },
-    { value: 'Asia/Kolkata', label: 'India Standard Time (IST)' },
-    { value: 'Australia/Sydney', label: 'Australian Eastern Time - Sydney (AET)' },
-    { value: 'Australia/Melbourne', label: 'Australian Eastern Time - Melbourne (AET)' },
-  ];
-
-  return commonTimezones;
+  return getTimezoneOptionsForUI();
 };
 
 /**
