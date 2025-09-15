@@ -64,14 +64,18 @@
       "electron/**/*",
       "node_modules/**/*"
     ],
+    "icon": "build/icon",
     "mac": {
       "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
       "target": "dmg"
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": "nsis"
     },
     "linux": {
+      "icon": "build/icon.png",
       "target": "AppImage"
     },
     "nsis": {

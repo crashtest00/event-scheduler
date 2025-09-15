@@ -23,7 +23,7 @@ function createWindow() {
       // Security: disable web security in development only if needed
       webSecurity: !isDev
     },
-    icon: join(__dirname, '../public/icon.png'), // Add an icon if you have one
+    icon: join(__dirname, '../build/icon.png'), // App icon
     show: false // Don't show until ready-to-show
   });
 
