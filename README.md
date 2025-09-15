@@ -1,70 +1,135 @@
-# Getting Started with Create React App
+# Event Scheduler
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A powerful desktop application for creating and managing recurring events with automated CSV export functionality. Perfect for organizing mentor swarms, investor events, and other recurring business activities.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+### 🔄 Recurring Event Management
+- Create weekly recurring patterns with flexible day selection
+- Set custom duration (number of weeks) for event series
+- Smart date handling with automatic DST (daylight saving time) transitions
+- Global program and staff assignment across all events
 
-### `npm start`
+### 📅 Single Event Creation
+- Quick one-off event scheduling
+- Independent configuration per event
+- Mixed recurring and single events in the same schedule
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 🌍 Timezone Support
+- Supports major timezones: Eastern, Central, Mountain, Pacific, Alaska, Central European Time
+- Automatic DST handling using IANA timezone identifiers
+- Consistent timezone display across UI and exports
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 📊 CSV Export
+- Schema-compliant CSV generation for external systems
+- Standardized time formats (10:00am, 2:30pm)
+- Proper timezone mapping and GMT conversion
+- Event type mapping (Mentor Swarm, Investor Swarm)
+- Automatic CSV download with proper formatting
 
-### `npm test`
+### 🎨 Modern Interface
+- Clean, intuitive React-based UI
+- Real-time event preview
+- Form validation and error handling
+- Responsive design for different screen sizes
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 💻 Cross-Platform Desktop App
+- Native desktop application built with Electron
+- Available for Windows (.exe), macOS (.dmg), and Linux (AppImage)
+- Offline functionality - no internet connection required
+- Native menu integration with keyboard shortcuts
 
-### `npm run build`
+## Development
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Prerequisites
+- Node.js 18+ and npm
+- For building: Platform-specific requirements for target OS
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Getting Started
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+# Install dependencies
+npm install
 
-### `npm run eject`
+# Start development server (web version)
+npm run dev
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# Start Electron development mode
+npm run electron-dev
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Available Scripts
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+#### Web Development
+- `npm run dev` - Start Vite development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+#### Electron Development
+- `npm run electron` - Run Electron app (production mode)
+- `npm run electron-dev` - Run Electron with hot reload
+- `npm run electron-build` - Build and package Electron app
 
-## Learn More
+#### Distribution
+- `npm run dist:win` - Build Windows installer
+- `npm run dist:mac` - Build macOS DMG
+- `npm run dist:linux` - Build Linux AppImage  
+- `npm run dist:all` - Build for all platforms
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Testing
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+# Run DST transition tests
+node src/utils/__tests__/dst-test.js
+```
 
-### Code Splitting
+## Architecture
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Core Components
+- **EventScheduler** - Main scheduling interface
+- **EventPreview** - Real-time event list display
+- **FormComponents** - Reusable form elements with validation
 
-### Analyzing the Bundle Size
+### Utilities
+- **eventUtils** - Event generation and CSV formatting
+- **timezoneUtils** - Timezone handling and display
+- **timezoneRegistry** - Centralized timezone configuration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Key Features
+- **Timezone Registry** - Single source of truth for timezone support
+- **DST Handling** - Automatic daylight saving time transitions
+- **CSV Schema Compliance** - Standardized export format
+- **Form Validation** - Real-time input validation
 
-### Making a Progressive Web App
+## CSV Export Format
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+The app generates CSV files with the following schema:
 
-### Advanced Configuration
+| Column | Description | Example |
+|--------|-------------|---------|
+| Slot | Event identifier (blank) | |
+| Program | Event program name | "Summer Mentor Program" |
+| Staff | Comma-separated staff list | "John Doe, Jane Smith" |
+| Virtual Location | Online meeting link | "https://zoom.us/..." |
+| Physical Location | Physical address | "123 Main St, City" |
+| Event Type | Standardized event type | "Mentor Swarm" |
+| Day of Week | Full day name | "Thursday" |
+| Event Date | M/D/YYYY format | "3/15/2025" |
+| Start Time | 12-hour format | "10:00am" |
+| End Time | 12-hour format | "11:30am" |
+| Time Zone | Mapped timezone name | "Eastern" |
+| GMT Start | GMT date/time | "3/15/2025 3:00pm" |
+| GMT End | GMT date/time | "3/15/2025 4:30pm" |
+| Slot Registrant Capacity | Maximum attendees | "25" |
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Technology Stack
 
-### Deployment
+- **Frontend**: React 18, Vite, Tailwind CSS
+- **Desktop**: Electron 38
+- **UI Components**: Material-UI, Lucide React icons
+- **Build Tools**: Electron Builder, Vite
+- **Date/Time**: Day.js, native Intl API for timezone handling
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## License
 
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is licensed under the MIT License.
